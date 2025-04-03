@@ -29,6 +29,8 @@ Keep your data private by using local LLMs or leverage powerful cloud models whe
 
 ## Screenshot
 
+<p align="center"><img src="https://raw.githubusercontent.com/danielefavi/ai-db-doc-agents/refs/heads/main/.uploads/ai-agents-db-docs-ui.png" width="90%" /></p>
+
 ---
 
 ## Development Status

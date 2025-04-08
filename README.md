@@ -31,7 +31,7 @@ Keep your data private by using local LLMs or leverage powerful cloud models whe
 
 | Chat To Database | Chat To Docs |
 | --- | --- |
-| <img src="https://raw.githubusercontent.com/danielefavi/ai-db-doc-agents/refs/heads/main/.github-uploads/ai-agent-chat-to-database.png" width="90%" /> | <img src="https://raw.githubusercontent.com/danielefavi/ai-db-doc-agents/refs/heads/main/.github-uploads/ai-agent-chat-to-docs.png" width="90%" /> |
+| <img src="https://raw.githubusercontent.com/danielefavi/ai-db-doc-agents/refs/heads/main/.github-uploads/ai-agent-chat-to-database.png" /> | <img src="https://raw.githubusercontent.com/danielefavi/ai-db-doc-agents/refs/heads/main/.github-uploads/ai-agent-chat-to-docs.png" /> |
 
 ---
 

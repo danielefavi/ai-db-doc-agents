@@ -86,6 +86,12 @@ Keep your data private by using local LLMs or leverage powerful cloud models whe
     pip install -r requirements.txt
     ```
 
+    Ensure to you have read/write/execute permissions to the `db` folder (where all vector stores are going to be placed):
+
+    ```sh
+    chmod -R u+rwx db
+    ```
+
     **On Windows:**
     ```sh
     python -m venv venv

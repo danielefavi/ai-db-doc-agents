@@ -31,7 +31,7 @@ Keep your data private by using local LLMs or leverage powerful cloud models whe
 
 | Chat To Database | Chat To Docs |
 | --- | --- |
-| <img src="https://raw.githubusercontent.com/danielefavi/ai-db-doc-agents/refs/heads/main/.github-uploads/ai-agent-chat-to-database.png" width="90%" /> | <img src="https://raw.githubusercontent.com/danielefavi/ai-db-doc-agents/refs/heads/main/.github-uploads/ai-agent-chat-to-docs.png" width="90%" /> |
+| <img src="https://raw.githubusercontent.com/danielefavi/ai-db-doc-agents/refs/heads/main/.github-uploads/ai-agent-chat-to-database.png" /> | <img src="https://raw.githubusercontent.com/danielefavi/ai-db-doc-agents/refs/heads/main/.github-uploads/ai-agent-chat-to-docs.png" /> |
 
 ---
 
@@ -84,6 +84,12 @@ Keep your data private by using local LLMs or leverage powerful cloud models whe
     chmod +x ./venv/bin/activate
     source venv/bin/activate
     pip install -r requirements.txt
+    ```
+
+    Ensure to you have read/write/execute permissions to the `db` folder (where all vector stores are going to be placed):
+
+    ```sh
+    chmod -R u+rwx db
     ```
 
     **On Windows:**

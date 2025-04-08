@@ -3,15 +3,11 @@ from langchain_core.messages import AIMessage, HumanMessage
 from langchain_ollama import ChatOllama
 import streamlit as st
 
-from sql_query_assistant import SQLQueryAssistant
+from libs.sql_query_assistant import SQLQueryAssistant
+from libs.ui_components import render_ollama_model_selector
 
 
-# LLM_NAME = "gemma3:12b"
-# LLM_NAME = "qwen2.5-coder:14b"
-LLM_NAME = os.getenv("LLM_MODEL") # @TODO: it should be set from the UI
-
-
-llm_model = ChatOllama(model=LLM_NAME)
+DEFAULT_LLM_MODEL = os.getenv("DEFAULT_LLM_MODEL")
 
 DB_DETAILS = {
     'host': os.getenv("DB_HOST"),
@@ -21,7 +17,9 @@ DB_DETAILS = {
     'database': os.getenv("DB_NAME")
 }
 
-aiAssistant = SQLQueryAssistant(db_config=DB_DETAILS, llm_model=llm_model)
+if "ai_assistant" not in st.session_state:
+    llm_model = ChatOllama(model=DEFAULT_LLM_MODEL)
+    st.session_state.ai_assistant = SQLQueryAssistant(db_config=DB_DETAILS, llm_model=llm_model)
 
 # Ensure DB details are present (add error handling if needed)
 if not all(DB_DETAILS.values()):
@@ -41,27 +39,29 @@ st.title("Chat to Database")
 
 
 with st.sidebar:
+    selected_llm = render_ollama_model_selector(
+        default_model_name=DEFAULT_LLM_MODEL
+    )
+    llm_model = ChatOllama(model=selected_llm)
+    st.session_state.ai_assistant = SQLQueryAssistant(db_config=DB_DETAILS, llm_model=llm_model)
+
+    st.markdown("---") 
+
+    st.code(f"""
+        DEFAULT_LLM_MODEL="{DEFAULT_LLM_MODEL}"
+        SELECTED_LLM="{selected_llm}"
+    """)
+
+    st.markdown("---") 
+
     st.markdown(
         """
-        <a href="https://github.com/danielefavi/ai-db-doc-agents" target="_blank" style="text-decoration: none; color: inherit;">
-            View Source Code
+        <a href="https://github.com/danielefavi/ai-db-doc-agents">
+            <img src="https://img.shields.io/badge/GitHub-Repo-blue?logo=github" alt="GitHub Repo">
         </a>
         """,
         unsafe_allow_html=True
     )
-    st.markdown("---") 
-
-    st.subheader('Models and parameters')
-    selected_model = st.sidebar.selectbox('Choose a model', ['Llama2-7B', 'Llama2-13B'], key='selected_model')
-    if selected_model == 'Llama2-7B':
-        llm = 'a16z-infra/llama7b-v2-chat:4f0a4744c7295c024a1de15e1a63c880d3da035fa1f49bfd344fe076074c8eea'
-    elif selected_model == 'Llama2-13B':
-        llm = 'a16z-infra/llama13b-v2-chat:df7690f1994d94e96ad9d568eac121aecf50684a0b0963b25a41cc40061269e5'
-    temperature = st.sidebar.slider('temperature', min_value=0.01, max_value=1.0, value=0.1, step=0.01)
-    top_p = st.sidebar.slider('top_p', min_value=0.01, max_value=1.0, value=0.9, step=0.01)
-    max_length = st.sidebar.slider('max_length', min_value=20, max_value=80, value=50, step=5)
-
-
 
 for message in st.session_state.chat_history:
     if isinstance(message, AIMessage):
@@ -98,7 +98,7 @@ if user_query is not None and user_query.strip() != "":
             i += 2 # Move to the next pair
 
     with st.chat_message("AI"):
-        response_dict = aiAssistant.invoke(
+        response_dict = st.session_state.ai_assistant.invoke(
             user_question=user_query,
             user_chat_history=history_to_pass
         )

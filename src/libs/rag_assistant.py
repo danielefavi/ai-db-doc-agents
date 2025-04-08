@@ -18,17 +18,33 @@ class RAGAssistant:
     with Ollama models and ChromaDB for retrieval.
     """
 
-    def __init__(self, embeddings_model: Embeddings, llm_model: BaseChatModel, persistent_db_folder: str, project_root: str):
+    def __init__(
+            self,
+            embeddings_model: Embeddings,
+            llm_model: BaseChatModel,
+            persistent_db_folder: str,
+            project_root: str,
+            retriever_search_type: str = "similarity",
+            retriever_k: int = 3
+        ):
         """
         Initializes the RAGAgent.
         """
         self.embeddings = embeddings_model
         self.llm = llm_model
         self.persistent_db_folder = persistent_db_folder
+        self.retriever_search_type = retriever_search_type
+        self.retriever_k = retriever_k
+        self.setup_executed = False
 
         self.project_root = os.path.abspath(project_root) # Ensure it's an absolute path
         if not os.path.isdir(self.project_root):
             raise NotADirectoryError(f"Provided project root '{self.project_root}' is not a valid directory.")
+        
+    def _setup(self):
+        self._setup_vector_store()
+        self._setup_retriever(self.retriever_search_type, self.retriever_k)
+        self._setup_chains()
 
     @staticmethod
     def _sanitize_for_foldername(name: str) -> str:
@@ -137,9 +153,8 @@ class RAGAssistant:
         # Ensure all elements in chat_history are BaseMessage instances
         if not all(isinstance(msg, BaseMessage) for msg in chat_history):
              raise TypeError("All elements in chat_history must be instances of BaseMessage (e.g., HumanMessage, SystemMessage).")
-
-        self._setup_vector_store()
-        self._setup_retriever()
-        self._setup_chains()
         
+        if not self.setup_executed:
+            self._setup()
+
         return self.rag_chain.invoke({"input": user_query, "chat_history": chat_history})

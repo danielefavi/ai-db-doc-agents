@@ -109,7 +109,8 @@ class ChromaLoader:
         """Creates and persists a Chroma vector store..."""
         print("\n--- Creating and persisting vector store ---")
         print(f"Storing to: {persistent_directory}")
-        os.makedirs(os.path.dirname(persistent_directory), exist_ok=True)
+        # os.makedirs(os.path.dirname(persistent_directory), exist_ok=True)
+        os.makedirs(persistent_directory, exist_ok=True)
         db = Chroma.from_documents(docs_split, self.embeddings, persist_directory=persistent_directory)
         print("--- Finished creating and persisting vector store ---")
         return db

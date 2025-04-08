@@ -3,3 +3,5 @@ venv/
 db/
 notes.txt
 src/__pycache__/
+src/libs/__pycache__/
+docs-test/

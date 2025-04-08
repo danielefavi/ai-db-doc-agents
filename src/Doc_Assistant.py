@@ -2,19 +2,16 @@ import os
 import streamlit as st
 from dotenv import load_dotenv
 from langchain_core.messages import AIMessage, HumanMessage, BaseMessage
-from chroma_loader import ChromaLoader
-from rag_assistant import RAGAssistant
+from libs.chroma_loader import ChromaLoader
+from libs.rag_assistant import RAGAssistant
+from libs.ui_components import render_ollama_model_selector
 from langchain_ollama import OllamaEmbeddings, ChatOllama
 from typing import List
 
 load_dotenv()
 
-# --- Configuration ---
-# LLM_MODEL = "llama3.1:8b"
-# LLM_MODEL = "gemma3:12b"
-# EMBEDDING_MODEL = "snowflake-arctic-embed2:568m"
-LLM_MODEL = os.getenv("LLM_MODEL") # @TODO: it should be set from the UI
-EMBEDDING_MODEL = os.getenv("EMBEDDING_MODEL") # @TODO: it should be set from the UI
+DEFAULT_LLM_MODEL = os.getenv("DEFAULT_LLM_MODEL")
+EMBEDDING_MODEL = os.getenv("EMBEDDING_MODEL")
 DOCS_FOLDER = os.getenv("DOCS_DIR")
 CHUNK_SIZE = 1000 # @TODO: it should be set from the UI
 CHUNK_OVERLAP = 100 # @TODO: it should be set from the UI
@@ -22,7 +19,6 @@ PROJECT_ROOT = os.getenv("PROJECT_ROOT") # @TODO: get it automatically instead f
 
 
 embeddings_model = OllamaEmbeddings(model=EMBEDDING_MODEL)
-llm_model = ChatOllama(model=LLM_MODEL)
 
 @st.cache_resource
 def get_chroma_loader():
@@ -32,20 +28,17 @@ def get_chroma_loader():
         project_root=PROJECT_ROOT
     )
 
-@st.cache_resource
-def get_rag_agent():
-    return RAGAssistant(
-        embeddings_model=embeddings_model,
-        llm_model=llm_model,
-        persistent_db_folder=EMBEDDING_MODEL,
-        project_root=PROJECT_ROOT
-    )
-
-# Initialize only if they don't exist
+if 'llm_model' not in st.session_state:
+    st.session_state.llm_model = ChatOllama(model=DEFAULT_LLM_MODEL)
 if 'loader' not in st.session_state:
     st.session_state.loader = get_chroma_loader()
 if 'agent' not in st.session_state:
-    st.session_state.agent = get_rag_agent()
+    st.session_state.agent = RAGAssistant(
+        embeddings_model=embeddings_model,
+        llm_model=st.session_state.llm_model,
+        persistent_db_folder=EMBEDDING_MODEL,
+        project_root=PROJECT_ROOT
+    )
 
 # Initialize chat history
 if "chat_history" not in st.session_state:
@@ -73,28 +66,19 @@ st.title("Chat to Docs")
 
 # --- Sidebar ---
 with st.sidebar:
-    st.markdown(
-        """
-        <a href="https://github.com/danielefavi/ai-db-doc-agents" target="_blank" style="text-decoration: none; color: inherit;">
-            View Source Code
-        </a>
-        """,
-        unsafe_allow_html=True
+    selected_llm = render_ollama_model_selector(
+        default_model_name=DEFAULT_LLM_MODEL
     )
-    st.markdown("---") 
-
-    st.header("Setting")
-
-    st.code(f"""
-        LLM_MODEL="{LLM_MODEL}"
-        EMBEDDING_MODEL="{EMBEDDING_MODEL}"
-        DOCS_FOLDER="{DOCS_FOLDER}"
-        CHUNK_SIZE={CHUNK_SIZE}
-        CHUNK_OVERLAP={CHUNK_OVERLAP}
-    """)
+    st.session_state.llm_model = ChatOllama(model=selected_llm)
+    st.session_state.agent = RAGAssistant(
+        embeddings_model=embeddings_model,
+        llm_model=st.session_state.llm_model,
+        persistent_db_folder=EMBEDDING_MODEL,
+        project_root=PROJECT_ROOT
+    )
 
     st.header("Document Management")
-    if st.button("⚠️ Delete Vector Store"):
+    if st.button("⚠️ Delete Vector Store", use_container_width=True):
         with st.spinner("Deleting the vector store..."):
             try:
                 st.session_state.loader.remove_vector_store()
@@ -106,7 +90,7 @@ with st.sidebar:
             except Exception as e:
                 st.error(f"Error deleting vector store: {e}")
 
-    if st.button("Load Documents"):
+    if st.button("Load Documents", use_container_width=True):
         # Check if docs folder exists
         if not os.path.isdir(DOCS_FOLDER):
              st.error(f"Error: Documents folder '{DOCS_FOLDER}' not found.")
@@ -126,6 +110,27 @@ with st.sidebar:
                 except Exception as e:
                     st.error(f"Error loading documents: {e}")
 
+    st.markdown("---")
+
+    st.code(f"""
+        DEFAULT_LLM_MODEL="{DEFAULT_LLM_MODEL}"
+        SELECTED_LLM="{selected_llm}"
+        EMBEDDING_MODEL="{EMBEDDING_MODEL}"
+        DOCS_FOLDER="{DOCS_FOLDER}"
+        CHUNK_SIZE={CHUNK_SIZE}
+        CHUNK_OVERLAP={CHUNK_OVERLAP}
+    """)
+
+    st.markdown("---")
+
+    st.markdown(
+        """
+        <a href="https://github.com/danielefavi/ai-db-doc-agents">
+            <img src="https://img.shields.io/badge/GitHub-Repo-blue?logo=github" alt="GitHub Repo">
+        </a>
+        """,
+        unsafe_allow_html=True
+    )
 # --- Chat Interface ---
 
 with st.chat_message("AI"):
@@ -161,6 +166,10 @@ if user_query is not None and user_query.strip() != "":
         with st.chat_message("AI"):
             with st.spinner("Thinking..."):
                 try:
+                    print("--- USER QUERY ---")
+                    print(st.session_state.llm_model.model)
+                    print(user_query);
+                    print("--------------------------")
                     response = st.session_state.agent.invoke(
                         user_query=user_query,
                         chat_history=history_for_agent

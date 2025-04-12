@@ -27,7 +27,7 @@ Keep your data private by using local LLMs or leverage powerful cloud models whe
 
 ---
 
-## Screenshot
+## Screenshots
 
 | Chat To Database | Chat To Docs |
 | --- | --- |
@@ -113,10 +113,19 @@ Keep your data private by using local LLMs or leverage powerful cloud models whe
 
 ## Usage
 
-1.  Open the application in your browser.
-2.  Use the sidebar to select either the "AI Doc Assistant" or the "AI Database Assistant".
-3.  Follow the on-screen instructions to:
-    * Upload documents for the Doc Assistant.
-    * Interact with the connected database via the chat interface for the Database Assistant.
-4.  Configure model parameters (like temperature, model choice) using the sidebar controls if needed.
+### AI Doc Assistant
+
+1. Copy your documents (**only `.TXT` or `.MD` files**) into the `docs` folder.
+2. Press the button *Load Documents*:
+    * In this phase the embedding model will create embeddings from the documents and they will be stored in the vector store.
+    * This phase is going to take a while depending on the embedding model you choose and the amount of the documents.
+3. Once it finishes you can ask question to the AI agent.
+
+> **IMPORTANT NOTE** if you change the embedding model you must load again the documents!
+
+### AI Database Assistant
+
+1. Make sure that the database details in the `.env` are correct.
+2. Make sure the database is up and running.
+3. Query the AI database agent.
 

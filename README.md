@@ -39,8 +39,6 @@ Keep your data private by using local LLMs or leverage powerful cloud models whe
 
 ⚠️ **Please Note:** This project is currently **under development**. Features may change, and bugs might be present.
 
-* **Important:** As the project is evolving, the names of the specific LLM and Embedding models used by the agents are currently **hardcoded** within the Streamlit pages. Future versions will have model selection more dynamic, through the UI.
-
 ---
 
 ## Technology Stack
@@ -59,8 +57,8 @@ Keep your data private by using local LLMs or leverage powerful cloud models whe
 * Python 3.x
 * Access to a terminal or command prompt.
 * Ollama
-    * At least LLM
-    * One Embedding model
+    * At least LLM: in the `.env.example` you will find `llama3.1:8b`
+    * One Embedding model: in the `.env.example` you will find `snowflake-arctic-embed2:568m`
 
 ### Installation & Setup
 
@@ -75,6 +73,8 @@ Keep your data private by using local LLMs or leverage powerful cloud models whe
     * Edit the `.env` file and add your credentials for:
         * Database connection details (e.g., `DB_HOST`, `DB_PORT`, `DB_USER`, `DB_PASSWORD`, `DB_NAME`)
         * LangSmith tracing details (Optional)
+    * Rename the name of the LLM you want to use (**it must be installed on Ollama**).
+    * Rename the name of the embedding model you want to use (**it must be installed on Ollama**).
 
 3.  **Install Dependencies:**
 
@@ -100,6 +100,9 @@ Keep your data private by using local LLMs or leverage powerful cloud models whe
     ```
 
 4.  **Run the Application:**
+
+    Make sure Ollama is running and the LLM and embedding model you set on the `.env` are installed on your local.
+
     ```sh
     streamlit run src/Doc_Assistant.py
     ```
